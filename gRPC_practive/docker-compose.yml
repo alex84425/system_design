@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  server_a:
+    build:
+      context: ./server_A
+    ports:
+      - "50051:50051"
+    environment:
+      - PYTHONUNBUFFERED=1
