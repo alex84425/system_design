@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   server_a:
     build:
-      context: ./server_A
+      context: .              # gRPC_practive/ 為 root，讓 Dockerfile 能存取 proto/
+      dockerfile: server_A/Dockerfile
     ports:
       - "50051:50051"
     environment:
