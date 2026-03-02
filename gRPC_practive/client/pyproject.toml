@@ -1,0 +1,14 @@
+[project]
+name = "client"
+version = "0.1.0"
+description = "gRPC Practice Client"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "grpcio>=1.62.0",
+    "grpcio-tools>=1.62.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
