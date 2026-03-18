@@ -1,0 +1,34 @@
+# -----------------------------------------------------------
+# Service: my-app-service
+# -----------------------------------------------------------
+# Service 是 K8s 的「流量入口」，它會把外部請求分配到後面的 Pod。
+# 用 NodePort 類型，讓你可以直接用 localhost:<nodePort> 訪問。
+apiVersion: v1              # Service 用的 API 版本
+kind: Service               # 資源類型：服務
+metadata:
+  name: my-app-service      # Service 名稱
+  namespace: my-practice    # 放在哪個 namespace
+spec:
+  type: NodePort            # 類型：NodePort（在每個 Node 上開一個固定 port）
+                            # 其他類型：ClusterIP（只限叢集內）、LoadBalancer（雲端用）
+  selector:
+    app: my-app             # 選擇帶有 app=my-app 標籤的 Pod 來接收流量
+                            # 這個要跟 Deployment 裡 Pod 的 labels 對應
+  ports:
+  # --- server-a 的對外端口 ---
+  - name: server-a          # port 命名（多 port 時必須命名）
+    port: 8080              # Service 對外暴露的 port（叢集內用這個 port 訪問）
+    targetPort: 8080        # 轉發到 Pod 裡容器的哪個 port
+    nodePort: 30080         # 在 Node 上開的 port（localhost:30080 可訪問）
+                            # nodePort 範圍：30000-32767
+  # --- server-b 的對外端口 ---
+  - name: server-b
+    port: 8081
+    targetPort: 8081
+    nodePort: 30081         # localhost:30081
+
+  # --- server-c 的對外端口 ---
+  - name: server-c
+    port: 8082
+    targetPort: 8082
+    nodePort: 30082         # localhost:30082

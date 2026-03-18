@@ -1,0 +1,9 @@
+# -----------------------------------------------------------
+# Namespace: my-practice
+# -----------------------------------------------------------
+# Namespace 是 K8s 裡的「隔離空間」，類似專案資料夾。
+# 把練習用的資源都放在 my-practice，不會汙染 default namespace。
+apiVersion: v1        # Namespace 用的 API 版本
+kind: Namespace       # 資源類型：命名空間
+metadata:
+  name: my-practice   # 命名空間名稱

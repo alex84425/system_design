@@ -1,3 +1,4 @@
+Docker Desktop already install
 我想在 Docker Desktop（已啟用 K8s）上練習 Kubernetes。
 
 ## 環境
