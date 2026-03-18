@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "host": "localhost",
+            "name": "Python Attach",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/src",
+                    "remoteRoot": "/app"
+                }
+            ],
+            "port": 5678,
+            "request": "attach",
+            "type": "python",
+            "justMyCode": false
+        }
+    ],
+    "version": "0.2.0"
+}
