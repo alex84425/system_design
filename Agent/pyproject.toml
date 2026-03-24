@@ -1,0 +1,13 @@
+[project]
+name = "langgraph-ui-agent"
+version = "0.1.0"
+description = "LangGraph Multi-Agent Pipeline with Gradio UI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "gradio>=6.9.0",
+    "langgraph>=1.1.3",
+]
+
+[project.scripts]
+run-ui = "langgraph_ui:build_ui"
