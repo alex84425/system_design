@@ -1,0 +1,12 @@
+[project]
+name = "llm-with-mcp"
+version = "0.1.0"
+description = "MCP server that creates test plans via natural language"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.26.0",
+    "pydantic>=2.12.5",
+]
+
+[project.scripts]
+serve = "server:mcp.run"
