@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
+<title>RAG 評估手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --paper:#F5F5F8;
+  --surface:#FFFFFF;
+  --surface-2:#EBEBF1;
+  --ink:#17181F;
+  --ink-2:#43454F;
+  --muted:#72747F;
+  --rule:#DBDBE3;
+  --rule-strong:#BFBFCC;
+  --retrieval:#3B4FA8;
+  --retrieval-soft:#E5E9F7;
+  --generation:#9B5117;
+  --generation-soft:#F6EADD;
+  --critical:#A82A20;
+  --critical-soft:#F8E7E5;
+
+  --f-display:'Archivo','Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;
+  --f-body:'Source Serif 4','Noto Serif TC','PMingLiU',Georgia,serif;
+  --f-ui:'Archivo','Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+
+  --wrap:1140px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101119;
+    --surface:#191A24;
+    --surface-2:#23242F;
+    --ink:#E9E9F0;
+    --ink-2:#B7B9C5;
+    --muted:#8A8C99;
+    --rule:#2C2D3A;
+    --rule-strong:#3E4050;
+    --retrieval:#94A4F2;
+    --retrieval-soft:#1D2040;
+    --generation:#E3A068;
+    --generation-soft:#37261A;
+    --critical:#F08A80;
+    --critical-soft:#3A1D1A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101119;
+  --surface:#191A24;
+  --surface-2:#23242F;
+  --ink:#E9E9F0;
+  --ink-2:#B7B9C5;
+  --muted:#8A8C99;
+  --rule:#2C2D3A;
+  --rule-strong:#3E4050;
+  --retrieval:#94A4F2;
+  --retrieval-soft:#1D2040;
+  --generation:#E3A068;
+  --generation-soft:#37261A;
+  --critical:#F08A80;
+  --critical-soft:#3A1D1A;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:16.5px;
+  line-height:1.85;
+  padding-inline:20px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--wrap);margin-inline:auto;}
+
+.masthead{padding-block:64px 40px;border-bottom:2px solid var(--ink);}
+.eyebrow{
+  font-family:var(--f-mono);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 20px;
+}
+h1{
+  font-family:var(--f-display);font-weight:700;
+  font-size:clamp(38px,6.4vw,68px);line-height:1.04;letter-spacing:-.022em;
+  margin:0 0 22px;text-wrap:balance;
+}
+.thesis{
+  font-size:clamp(17px,2.1vw,21px);line-height:1.7;color:var(--ink-2);
+  max-width:60ch;margin:0;
+}
+.thesis strong{color:var(--ink);font-weight:600;}
+
+.shell{display:block;}
+@media (min-width:1000px){
+  .shell{display:grid;grid-template-columns:186px minmax(0,1fr);gap:56px;align-items:start;}
+  .toc{position:sticky;top:28px;}
+}
+.toc{padding-block:34px 0;}
+.toc-title{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 12px;
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;}
+@media (min-width:1000px){.toc ol{display:block;}}
+.toc li{margin:0;}
+.toc a{
+  font-family:var(--f-ui);font-size:13px;line-height:1.5;color:var(--muted);
+  text-decoration:none;display:block;padding-block:4px;
+  border-bottom:1px solid transparent;
+}
+.toc a:hover,.toc a:focus-visible{color:var(--ink);border-bottom-color:var(--rule-strong);}
+
+main{padding-block:34px 0;}
+section{padding-block:46px;border-top:1px solid var(--rule);}
+section:first-child{border-top:none;padding-top:22px;}
+
+h2{
+  font-family:var(--f-display);font-weight:700;
+  font-size:clamp(25px,3.4vw,34px);line-height:1.18;letter-spacing:-.014em;
+  margin:0 0 8px;text-wrap:balance;
+}
+.sec-num{
+  font-family:var(--f-mono);font-size:12px;color:var(--muted);
+  letter-spacing:.1em;display:block;margin-bottom:10px;
+}
+.dek{color:var(--muted);font-size:15.5px;line-height:1.7;margin:0 0 30px;max-width:62ch;}
+h3{
+  font-family:var(--f-display);font-weight:600;font-size:18.5px;
+  letter-spacing:-.005em;margin:38px 0 14px;line-height:1.35;
+}
+p{max-width:66ch;margin:0 0 18px;}
+a{color:var(--retrieval);text-decoration-thickness:1px;text-underline-offset:3px;}
+strong{font-weight:600;}
+em{font-style:italic;}
+code{
+  font-family:var(--f-mono);font-size:.86em;
+  background:var(--surface-2);padding:.12em .38em;border-radius:3px;
+}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px;}
+.chip{
+  font-family:var(--f-ui);font-size:12.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 12px 5px 9px;border-radius:2px;
+}
+.chip::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;}
+.chip.r{color:var(--retrieval);background:var(--retrieval-soft);}
+.chip.g{color:var(--generation);background:var(--generation-soft);}
+
+.pipe{
+  background:var(--surface);border:1px solid var(--rule);
+  padding:30px 22px 24px;margin-bottom:12px;overflow-x:auto;
+}
+.pipe svg{display:block;min-width:520px;max-width:100%;height:auto;margin-inline:auto;}
+.svg-node{font-family:var(--f-ui);font-size:13.5px;font-weight:600;fill:var(--ink);}
+.svg-metric{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.02em;}
+.svg-sub{font-family:var(--f-ui);font-size:11.5px;fill:var(--muted);}
+.svg-stage{font-family:var(--f-ui);font-size:13px;font-weight:700;}
+
+.tw{overflow-x:auto;margin:0 0 8px;border:1px solid var(--rule);background:var(--surface);}
+table{border-collapse:collapse;width:100%;min-width:560px;font-family:var(--f-ui);font-size:14.5px;line-height:1.6;}
+thead th{
+  text-align:left;font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:13px 16px;border-bottom:1px solid var(--rule-strong);
+  background:var(--surface-2);white-space:nowrap;
+}
+td{padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2);}
+tbody tr:last-child td{border-bottom:none;}
+td:first-child{color:var(--ink);font-weight:600;white-space:nowrap;}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+td.w{white-space:normal;}
+.half{display:inline-block;width:3px;height:1.15em;vertical-align:-.2em;margin-right:9px;border-radius:2px;}
+.half.r{background:var(--retrieval);}
+.half.g{background:var(--generation);}
+.cap{font-size:13px;color:var(--muted);font-family:var(--f-ui);margin:10px 0 0;line-height:1.6;}
+
+.gauges{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));margin:30px 0 6px;}
+.gauge{background:var(--surface);border:1px solid var(--rule);padding:18px 18px 14px;}
+.gauge-name{font-family:var(--f-ui);font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 2px;}
+.gauge-ctx{font-family:var(--f-ui);font-size:12px;color:var(--muted);margin:0 0 16px;line-height:1.5;}
+.gauge-val{
+  font-family:var(--f-mono);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;line-height:1;margin:0 0 12px;
+}
+.gauge.r .gauge-val{color:var(--retrieval);}
+.gauge.g .gauge-val{color:var(--generation);}
+.track{position:relative;height:7px;background:var(--surface-2);border-radius:1px;}
+.pass{position:absolute;top:0;bottom:0;right:0;border-radius:1px;opacity:.42;}
+.gauge.r .pass{background:var(--retrieval);}
+.gauge.g .pass{background:var(--generation);}
+.mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink);}
+.ticks{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);margin-top:7px;font-variant-numeric:tabular-nums;}
+
+.note{border-left:3px solid var(--critical);background:var(--critical-soft);padding:18px 20px;margin:26px 0;}
+.note p{margin:0;max-width:62ch;font-size:15.5px;}
+.note p + p{margin-top:12px;}
+.note-label{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--critical);display:block;margin-bottom:8px;font-weight:600;
+}
+
+.pull{
+  font-family:var(--f-display);font-weight:600;
+  font-size:clamp(19px,2.6vw,25px);line-height:1.45;letter-spacing:-.01em;
+  color:var(--ink);border-left:3px solid var(--retrieval);
+  padding:4px 0 4px 22px;margin:30px 0;max-width:34ch;text-wrap:balance;
+}
+
+.layers{display:flex;flex-direction:column;gap:6px;margin:26px 0 8px;}
+.layer{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--retrieval);
+  padding:13px 18px;
+}
+.layer:nth-child(3),.layer:nth-child(4){border-left-color:var(--generation);}
+.layer-k{font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--ink);min-width:104px;}
+.layer-v{font-family:var(--f-ui);font-size:14px;color:var(--ink-2);line-height:1.55;}
+
+.steps{list-style:none;counter-reset:s;margin:26px 0 0;padding:0;}
+.steps li{counter-increment:s;position:relative;padding:16px 0 16px 52px;border-top:1px solid var(--rule);}
+.steps li:last-child{border-bottom:1px solid var(--rule);}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:17px;
+  font-family:var(--f-mono);font-size:12px;font-weight:600;
+  color:var(--retrieval);background:var(--retrieval-soft);
+  width:26px;height:26px;display:grid;place-items:center;border-radius:50%;
+}
+.step-h{font-family:var(--f-ui);font-size:15.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:4px;}
+.step-b{font-family:var(--f-ui);font-size:14px;color:var(--ink-2);line-height:1.65;}
+
+.road{display:grid;gap:0;margin:28px 0 0;}
+.stage{display:grid;gap:4px 20px;grid-template-columns:1fr;border-top:1px solid var(--rule);padding:18px 0;}
+.road .stage:last-child{border-bottom:1px solid var(--rule);}
+@media (min-width:660px){.stage{grid-template-columns:96px minmax(0,1fr) 200px;align-items:baseline;}}
+.stage-k{font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:var(--retrieval);letter-spacing:.04em;}
+.stage-t{font-family:var(--f-ui);font-size:15.5px;font-weight:600;color:var(--ink);line-height:1.5;}
+.stage-w{font-family:var(--f-ui);font-size:13.5px;color:var(--muted);line-height:1.55;}
+
+.corpus{background:var(--surface);border:1px solid var(--rule);padding:26px 24px;margin:26px 0 0;}
+.corpus h3:first-child{margin-top:0;}
+
+.recipes{display:grid;gap:0;margin:20px 0 0;border-top:1px solid var(--rule);}
+.recipe{
+  display:grid;grid-template-columns:1fr;gap:2px 18px;
+  padding:14px 0;border-bottom:1px solid var(--rule);
+}
+@media (min-width:560px){.recipe{grid-template-columns:116px minmax(0,1fr);align-items:baseline;}}
+.recipe-n{font-family:var(--f-display);font-size:15px;font-weight:600;color:var(--generation);}
+.recipe-f{font-family:var(--f-mono);font-size:13px;color:var(--ink-2);line-height:1.6;}
+.recipe-f b{color:var(--ink);font-weight:600;}
+
+.probe{
+  font-family:var(--f-mono);font-size:13.5px;line-height:1.8;
+  background:var(--surface-2);padding:16px 18px;margin:20px 0 0;
+  border-left:3px solid var(--generation);overflow-x:auto;
+}
+.probe .q{color:var(--ink);font-weight:500;}
+.probe .c{color:var(--muted);}
+
+.triad{background:var(--surface);border:1px solid var(--rule);padding:24px 18px 14px;margin:26px 0 0;overflow-x:auto;}
+.triad svg{display:block;min-width:440px;max-width:520px;height:auto;margin-inline:auto;}
+
+.src{padding-block:44px 72px;border-top:2px solid var(--ink);}
+.src h2{font-size:20px;margin-bottom:20px;}
+.src ul{list-style:none;margin:0;padding:0;display:grid;gap:11px;}
+.src li{font-family:var(--f-ui);font-size:14px;line-height:1.55;}
+.src a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule-strong);}
+.src a:hover,.src a:focus-visible{color:var(--retrieval);border-bottom-color:var(--retrieval);}
+
+:focus-visible{outline:2px solid var(--retrieval);outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+@media (max-width:520px){body{font-size:16px;}section{padding-block:38px;}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">面試準備 · 檢索增強生成</p>
+  <h1>RAG 評估手冊</h1>
+  <p class="thesis">端到端分數爛掉的時候，你必須知道是<strong>「沒撈到」</strong>還是<strong>「撈到了但講錯」</strong>。所有正經的 RAG 評估都從這一刀開始 —— 這份文件就是沿著這一刀寫的。</p>
+</header>
+
+<div class="shell">
+
+<nav class="toc" aria-label="目錄">
+  <p class="toc-title">目錄</p>
+  <ol>
+    <li><a href="#split">拆兩段量</a></li>
+    <li><a href="#retrieval">檢索端指標</a></li>
+    <li><a href="#generation">生成端指標</a></li>
+    <li><a href="#judge">評審的評審</a></li>
+    <li><a href="#practice">大廠實務流程</a></li>
+    <li><a href="#failure">失敗類型分類</a></li>
+    <li><a href="#tools">工具選型</a></li>
+    <li><a href="#corpus">語料：經典調酒</a></li>
+    <li><a href="#synthetic">合成 Eval Set</a></li>
+    <li><a href="#roadmap">實作路線圖</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="split">
+  <span class="sec-num">01 — 核心心法</span>
+  <h2>拆兩段量</h2>
+  <p class="dek">這是整份文件最重要的一句話，也是面試最容易分出高下的地方。只講「我用 RAGAS 跑分」的人在這裡就停了。</p>
+
+  <div class="legend">
+    <span class="chip r">檢索端 Retrieval</span>
+    <span class="chip g">生成端 Generation</span>
+  </div>
+
+  <div class="pipe">
+    <svg viewBox="0 0 700 220" role="img" aria-label="RAG 管線圖：查詢經過檢索得到脈絡，再經過生成得到答案。檢索端量 Recall 與 NDCG，生成端量 Faithfulness">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule-strong)"></path>
+        </marker>
+      </defs>
+
+      <line x1="86" y1="96" x2="196" y2="96" stroke="var(--rule-strong)" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <line x1="304" y1="96" x2="396" y2="96" stroke="var(--rule-strong)" stroke-width="1.5" marker-end="url(#ar)"></line>
+      <line x1="504" y1="96" x2="596" y2="96" stroke="var(--rule-strong)" stroke-width="1.5" marker-end="url(#ar)"></line>
+
+      <text class="svg-node" x="44" y="101" text-anchor="middle">Query</text>
+      <text class="svg-sub" x="44" y="119" text-anchor="middle">使用者提問</text>
+
+      <rect x="200" y="70" width="104" height="52" fill="var(--retrieval-soft)" stroke="var(--retrieval)" stroke-width="1.5"></rect>
+      <text class="svg-stage" x="252" y="101" text-anchor="middle" fill="var(--retrieval)">檢索</text>
+
+      <text class="svg-node" x="450" y="101" text-anchor="middle">Context</text>
+      <text class="svg-sub" x="450" y="119" text-anchor="middle">撈回的片段</text>
+
+      <rect x="600" y="70" width="76" height="52" fill="var(--generation-soft)" stroke="var(--generation)" stroke-width="1.5"></rect>
+      <text class="svg-stage" x="638" y="101" text-anchor="middle" fill="var(--generation)">生成</text>
+      <text class="svg-sub" x="638" y="52" text-anchor="middle">→ Answer</text>
+
+      <line x1="252" y1="122" x2="252" y2="156" stroke="var(--retrieval)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+      <text class="svg-metric" x="252" y="174" text-anchor="middle" fill="var(--retrieval)">Recall@k · NDCG@k</text>
+      <text class="svg-sub" x="252" y="193" text-anchor="middle">資訊有沒有進來</text>
+
+      <line x1="638" y1="122" x2="638" y2="156" stroke="var(--generation)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+      <text class="svg-metric" x="638" y="174" text-anchor="middle" fill="var(--generation)">Faithfulness</text>
+      <text class="svg-sub" x="638" y="193" text-anchor="middle">有沒有照著講</text>
+    </svg>
+  </div>
+  <p class="cap">兩個探針分別掛在管線的兩個位置。只看端到端分數，等於把探針拆掉只留一顆總電表。</p>
+
+  <p>拆開之後，除錯就變成可決策的：<strong>Recall 高但 Faithfulness 低</strong>，代表資料撈對了，問題在 prompt 或模型；<strong>Recall 低</strong>，那不管生成端多強都救不回來，先回去修 chunking、embedding 或 hybrid search。這個因果順序本身就是一個完整的面試答案。</p>
+</section>
+
+<section id="retrieval">
+  <span class="sec-num">02 — 檢索端</span>
+  <h2>檢索端指標</h2>
+  <p class="dek">不需要 LLM，純數學。便宜、穩定、可以每次 commit 都跑。先把這一端量準，再花錢量生成端。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>指標</th><th>在測什麼</th><th>什麼時候該看它</th></tr></thead>
+      <tbody>
+        <tr><td>Recall@k</td><td class="w">正確文件有沒有出現在前 k 筆裡</td><td class="w"><strong>最重要。</strong>這裡漏了，後面再強都救不回來</td></tr>
+        <tr><td>Precision@k</td><td class="w">前 k 筆裡有幾筆是真的相關</td><td class="w">context window 有限、雜訊會干擾 LLM 時</td></tr>
+        <tr><td>MRR</td><td class="w">第一個正確答案排名的倒數平均</td><td class="w">只需要一筆正確文件的場景，例如 FAQ</td></tr>
+        <tr><td>NDCG@k</td><td class="w">同時考慮排序位置與分級相關性</td><td class="w"><strong>評估 rerank 效果一定看這個</strong></td></tr>
+        <tr><td>Hit Rate</td><td class="w">Recall@k 的二元版，有或沒有</td><td class="w">快速看板、CI 門檻</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">NDCG 與端到端品質的相關性比二元的 precision／recall 更強，因為 LLM 確實會受 context 順序影響。</p>
+
+  <h3>業界參考門檻</h3>
+  <p>不是鐵律，但面試時講得出具體數字，跟只會說「越高越好」是兩個等級。</p>
+
+  <div class="gauges">
+    <div class="gauge r">
+      <p class="gauge-name">Precision@5</p>
+      <p class="gauge-ctx">窄領域知識庫</p>
+      <p class="gauge-val">≥ 0.70</p>
+      <div class="track"><span class="pass" style="left:70%"></span><span class="mark" style="left:70%"></span></div>
+      <div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div>
+    </div>
+    <div class="gauge r">
+      <p class="gauge-name">Recall@20</p>
+      <p class="gauge-ctx">廣語料搜尋</p>
+      <p class="gauge-val">≥ 0.80</p>
+      <div class="track"><span class="pass" style="left:80%"></span><span class="mark" style="left:80%"></span></div>
+      <div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div>
+    </div>
+    <div class="gauge g">
+      <p class="gauge-name">Faithfulness</p>
+      <p class="gauge-ctx">一般生產系統</p>
+      <p class="gauge-val">&gt; 0.80</p>
+      <div class="track"><span class="pass" style="left:80%"></span><span class="mark" style="left:80%"></span></div>
+      <div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div>
+    </div>
+    <div class="gauge g">
+      <p class="gauge-name">Faithfulness</p>
+      <p class="gauge-ctx">醫療／法律／金融</p>
+      <p class="gauge-val">&gt; 0.90</p>
+      <div class="track"><span class="pass" style="left:90%"></span><span class="mark" style="left:90%"></span></div>
+      <div class="ticks"><span>0</span><span>0.5</span><span>1.0</span></div>
+    </div>
+  </div>
+  <p class="cap">深色區塊為可接受區間，直線為門檻位置。</p>
+
+  <div class="note">
+    <span class="note-label">面試陷阱題</span>
+    <p><strong>「Recall@k 的 k 為什麼不能無限調大？」</strong></p>
+    <p>k 越大 Recall 一定漲，但 Precision 掉、context 變長、成本變高，而且 LLM 會被雜訊干擾（lost-in-the-middle：長 context 中段的資訊最容易被忽略）。所以實務做法是 <code>retrieve k=50 → rerank → 取 top 5</code>。答得出後半句才算過關。</p>
+  </div>
+</section>
+
+<section id="generation">
+  <span class="sec-num">03 — 生成端</span>
+  <h2>生成端指標</h2>
+  <p class="dek">這一端要用 LLM 當評審，所以貴、慢、而且會有偏誤。不要每次 commit 都跑全量。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>指標</th><th>在測什麼</th><th>生產門檻</th></tr></thead>
+      <tbody>
+        <tr><td>Faithfulness</td><td class="w">答案的每個 claim 都能從 context 找到支持嗎 —— 直接測幻覺</td><td class="n">&gt; 0.80<br>高風險 &gt; 0.90</td></tr>
+        <tr><td>Answer Relevancy</td><td class="w">有沒有真的回答問題。可能完全忠實卻答非所問</td><td class="n">&gt; 0.80</td></tr>
+        <tr><td>Context Precision</td><td class="w">撈回來的 context 有多少比例真的被用上</td><td class="n">視場景</td></tr>
+        <tr><td>Answer Correctness</td><td class="w">跟人工寫的標準答案比對</td><td class="n">需 ground truth</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>RAG Triad</h3>
+  <p>TruLens 把前三個包成一個好記的三角形。面試時用這張圖開場很有效 —— 一句話交代完整個評估架構，而且對方立刻知道你不是只會跑 library。</p>
+
+  <div class="triad">
+    <svg viewBox="0 0 480 320" role="img" aria-label="RAG Triad 三角形：頂點為 Query、Context、Response，三條邊分別是 Context Relevance、Groundedness、Answer Relevance">
+      <polygon points="240,54 96,232 384,232" fill="none" stroke="var(--rule-strong)" stroke-width="1.5"></polygon>
+
+      <circle cx="240" cy="54" r="5.5" fill="var(--ink)"></circle>
+      <circle cx="96" cy="232" r="5.5" fill="var(--retrieval)"></circle>
+      <circle cx="384" cy="232" r="5.5" fill="var(--generation)"></circle>
+
+      <text class="svg-node" x="240" y="34" text-anchor="middle">Query</text>
+      <text class="svg-node" x="96" y="256" text-anchor="middle" fill="var(--retrieval)">Context</text>
+      <text class="svg-node" x="384" y="256" text-anchor="middle" fill="var(--generation)">Response</text>
+
+      <text class="svg-metric" x="140" y="132" text-anchor="end" fill="var(--retrieval)">Context Relevance</text>
+      <text class="svg-sub" x="140" y="150" text-anchor="end">撈回來的跟問題有關嗎</text>
+
+      <text class="svg-metric" x="344" y="132" text-anchor="start" fill="var(--generation)">Answer Relevance</text>
+      <text class="svg-sub" x="344" y="150" text-anchor="start">答案有回答問題嗎</text>
+
+      <text class="svg-metric" x="240" y="282" text-anchor="middle" fill="var(--generation)">Groundedness</text>
+      <text class="svg-sub" x="240" y="300" text-anchor="middle">答案有根據 context 嗎</text>
+    </svg>
+  </div>
+</section>
+
+<section id="judge">
+  <span class="sec-num">04 — 評審的評審</span>
+  <h2>LLM-as-Judge 的坑</h2>
+  <p class="dek">大部分人只知道「用 GPT-4o 當評審」，不知道評審本身要先被評審。這題答得出來就是資深。</p>
+
+  <p class="pull">評審沒校準過，後面所有數字都是假的。</p>
+
+  <h3>先驗證 judge</h3>
+  <p>抽 100 題人工標註，跟 judge 的判斷算一致性（Cohen's kappa）。kappa 太低，代表你的整個 eval 建立在流沙上 —— 你會根據錯誤的訊號去調 chunk size，然後以為自己在進步。</p>
+  <p>參考值：GPT-4o 等級的評審在區分「真相關」與 hard negative 上大約有 <strong>80% 以上</strong>的準確率。夠用，但不是真理。</p>
+
+  <h3>三個已知偏誤</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>偏誤</th><th>症狀</th></tr></thead>
+      <tbody>
+        <tr><td>Verbosity bias</td><td class="w">答案越長分數越高，即使冗詞贅字並沒有增加資訊</td></tr>
+        <tr><td>Position bias</td><td class="w">成對比較時，排在前面的選項系統性佔優</td></tr>
+        <tr><td>Self-preference</td><td class="w">模型偏好自己家族生成的文字風格</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>對策</h3>
+  <p>用<strong>結構化 rubric</strong>（明確寫出每一分的判準）加上<strong>強制 JSON 輸出</strong>，而不是丟一句「請給 1 到 5 分」。分數會穩定得多，而且每一筆判斷都可稽核 —— 企業場景裡這點比分數本身更重要，因為你得跟法遵解釋為什麼系統說了那句話。</p>
+</section>
+
+<section id="practice">
+  <span class="sec-num">05 — 實務</span>
+  <h2>大廠實際怎麼做</h2>
+  <p class="dek">一般人講到 RAGAS 就停了。這一段是真正的分水嶺 —— 差別在於你有沒有把評估當成一套工程系統，而不是一次性的跑分。</p>
+
+  <h3>分層評估</h3>
+  <div class="layers">
+    <div class="layer"><span class="layer-k">Unit</span><span class="layer-v">單一 chunk 能不能被它自己的問題檢索到</span></div>
+    <div class="layer"><span class="layer-k">Component</span><span class="layer-v">整條 retrieval pipeline 的 Recall 與 NDCG</span></div>
+    <div class="layer"><span class="layer-k">End-to-end</span><span class="layer-v">完整答案的 Faithfulness 與 Correctness</span></div>
+    <div class="layer"><span class="layer-k">Online</span><span class="layer-v">真實使用者訊號 —— 這一層才是真相</span></div>
+  </div>
+
+  <h3>Golden set 是人工標的</h3>
+  <p>合成資料是起點，不是終點。正式的 eval set 是幾百到幾千題、人工逐題審過的。這件事看起來像雜務，實際上是<strong>護城河</strong> —— 模型會換、框架會換，標註過的 golden set 會一直留著。</p>
+
+  <h3>Regression suite 進 CI</h3>
+  <p>每次改 chunk size、換 embedding、動 prompt，全部自動跑。設門檻：任一指標掉超過 3% 就擋 PR。DeepEval 直接接 pytest 就是為了這件事。</p>
+
+  <h3>線上訊號才是真相</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>訊號</th><th>代表什麼</th></tr></thead>
+      <tbody>
+        <tr><td>Thumbs up / down</td><td class="w">最直接，但回報率低且有自我選擇偏誤</td></tr>
+        <tr><td>Escalation rate</td><td class="w">轉真人客服的比例 —— 系統失敗的硬指標</td></tr>
+        <tr><td>Rephrase rate</td><td class="w">使用者換句話再問一次，等於上一輪失敗了</td></tr>
+        <tr><td>Session 長度</td><td class="w">要看方向：查詢型變長是壞事，探索型不一定</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">離線分數漂亮、線上爛透，是常態而不是意外。</p>
+</section>
+
+<section id="failure">
+  <span class="sec-num">06 — 除錯</span>
+  <h2>失敗類型分類</h2>
+  <p class="dek">不要只看總分，要看錯在哪。把失敗歸類之後優化才有方向，否則你只是在亂調參數然後祈禱分數上升。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>失敗類型</th><th>該修哪裡</th></tr></thead>
+      <tbody>
+        <tr><td><span class="half r"></span>檢索沒撈到</td><td class="w">chunking 策略、embedding 選型、加 hybrid search（BM25 + vector）</td></tr>
+        <tr><td><span class="half r"></span>撈到了但排很後面</td><td class="w">加 reranker（cross-encoder）</td></tr>
+        <tr><td><span class="half g"></span>撈到了但 LLM 沒用</td><td class="w">prompt 設計、context 排列順序</td></tr>
+        <tr><td><span class="half g"></span>用了但講錯</td><td class="w">模型能力、加強 faithfulness 約束與引用要求</td></tr>
+        <tr><td><span class="half g"></span>語料裡根本沒有</td><td class="w"><strong>要能誠實說「我不知道」</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="note-label">大多數人漏掉這一類</span>
+    <p>你的 eval set 一定要包含<strong>答案不在語料裡</strong>的問題，測系統會不會硬掰。這叫 negative testing，是大廠一定做、但教學文章幾乎不提的東西。</p>
+    <p>沒有這類題目，你的 Faithfulness 分數會虛高 —— 因為你從來沒給過系統說謊的機會。</p>
+  </div>
+</section>
+
+<section id="tools">
+  <span class="sec-num">07 — 工具</span>
+  <h2>工具選型</h2>
+  <p class="dek">四個都碰過、講得出差異，比只會用一個更有說服力。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>工具</th><th>定位</th><th>什麼時候用</th></tr></thead>
+      <tbody>
+        <tr><td>RAGAS</td><td class="w">最專注 RAG，內建合成測試集生成，reference-free</td><td class="w"><strong>從零到有分數最快</strong>，先用這個</td></tr>
+        <tr><td>DeepEval</td><td class="w">測試優先，直接接 pytest 與 CI／CD</td><td class="w">RAG 是更大的 agent 或 chatbot 的一部分時</td></tr>
+        <tr><td>TruLens</td><td class="w">evaluation 與 tracing 合一，RAG Triad 的出處</td><td class="w">想同時看到每一步實際發生什麼</td></tr>
+        <tr><td>LangFuse / Phoenix</td><td class="w">線上 tracing 與監控</td><td class="w">進生產之後</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="corpus">
+  <span class="sec-num">08 — 語料決定</span>
+  <h2>經典調酒配方</h2>
+  <p class="dek">語料的第一要求不是有趣，是<strong>你看得懂答案對不對</strong>。不懂的領域標不出 golden set，標不出 golden set 就沒有評估，沒有評估就只是做 demo。調酒同時滿足「有趣」和「可驗證」—— 配方對不對，查一下就知道，不需要領域專家。</p>
+
+  <div class="corpus">
+    <h3>它剛好是 hard negative 的教科書</h3>
+    <p>下面三杯是同一個 <strong>Sour 骨架</strong>（基酒＋柑橘＋甜味），只換基酒。文字描述近乎一模一樣，embedding 距離幾乎為零：</p>
+
+    <div class="recipes">
+      <div class="recipe">
+        <span class="recipe-n">Daiquiri</span>
+        <span class="recipe-f"><b>白蘭姆酒</b> 45ml · 萊姆汁 25ml · 糖漿 15ml　<i>shake</i></span>
+      </div>
+      <div class="recipe">
+        <span class="recipe-n">Margarita</span>
+        <span class="recipe-f"><b>龍舌蘭</b> 35ml · 萊姆汁 20ml · 橙酒 20ml　<i>shake</i></span>
+      </div>
+      <div class="recipe">
+        <span class="recipe-n">Sidecar</span>
+        <span class="recipe-f"><b>干邑白蘭地</b> 40ml · 檸檬汁 20ml · 橙酒 20ml　<i>shake</i></span>
+      </div>
+    </div>
+
+    <div class="probe">
+      <span class="q">Q：「有沒有酸酸甜甜、帶柑橘的短飲？」</span><br>
+      <span class="c">→ 三杯的向量分數幾乎相同，排序等於擲骰子</span><br>
+      <span class="c">→ 想穩定命中，必須靠 metadata filter（基酒）或 rerank</span><br>
+      <span class="c">→ 這就是你示範 hybrid search 價值的最佳舞台</span>
+    </div>
+
+    <h3>四種題型天然齊備</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>題型</th><th>範例</th></tr></thead>
+        <tbody>
+          <tr><td>單跳事實</td><td class="w">「Negroni 的三種材料比例是多少？」</td></tr>
+          <tr><td>Multi-hop</td><td class="w">「我家只有琴酒和甜苦艾酒，能調什麼？」需要跨多筆配方彙整</td></tr>
+          <tr><td>口語化改寫</td><td class="w">「有沒有不苦、女生會喜歡的？」術語與白話的語意落差</td></tr>
+          <tr><td>Negative</td><td class="w">「Negroni 的抹茶版本比例？」語料裡沒有 —— 測會不會硬掰</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>還有三個工程上的好處</h3>
+    <p><strong>結構化 metadata 現成。</strong>每筆配方天然帶有基酒、手法（shake／stir／build）、杯型、IBA 分類、酒精強度 —— 直接拿來練 metadata filtering 與 hybrid search，不用自己造。</p>
+    <p><strong>量剛好。</strong>IBA 官方 77 款加上經典擴充約數百筆，筆電跑得動，一次實驗幾分鐘跑完，你能快速迭代而不是等一整晚。</p>
+    <p><strong>Demo 有記憶點。</strong>面試時你打開一個會推薦調酒的系統，對方一定會多問兩句 —— 那正是你把 Recall、rerank、negative testing 講出來的機會。</p>
+  </div>
+</section>
+
+<section id="synthetic">
+  <span class="sec-num">09 — 合成資料</span>
+  <h2>合成 Eval Set 的正確做法</h2>
+  <p class="dek">合成解決的是「標註成本」，不是「你看不懂答案」。第 4 步不能省 —— 那一步就是你的判斷力派上用場的地方。</p>
+
+  <ol class="steps">
+    <li>
+      <span class="step-h">取一個 chunk</span>
+      <span class="step-b">從切好的語料隨機抽樣，注意涵蓋不同基酒與長度分布，不要全部擠在琴酒那一區。</span>
+    </li>
+    <li>
+      <span class="step-h">叫 LLM 出題</span>
+      <span class="step-b">提示詞的關鍵是「出一個客人<em>真的會在吧台問</em>的問題」。不加這個限定，你會得到一堆「本文提到的三種材料是什麼」這種考卷式問題。</span>
+    </li>
+    <li>
+      <span class="step-h">那個 chunk 自動就是 ground truth</span>
+      <span class="step-b">這是整個手法的精髓 —— Recall@k 與 NDCG@k 完全免費拿到，不需要任何人工標註。</span>
+    </li>
+    <li>
+      <span class="step-h">人工抽審 10 到 20 個百分比</span>
+      <span class="step-b">砍掉爛題：答案直接抄在問題裡的、模糊到無法判斷的、根本不是人會問的。<strong>這一步不能省。</strong></span>
+    </li>
+    <li>
+      <span class="step-h">補上三種進階題型</span>
+      <span class="step-b">只做前四步的 eval set 太簡單，分數會虛高。必須補：<strong>multi-hop</strong>、<strong>negative</strong>、<strong>口語化改寫</strong>。上一節的四種題型就是照這個清單設計的。</span>
+    </li>
+  </ol>
+
+  <p style="margin-top:28px">RAGAS 的 <code>TestsetGenerator</code> 做的是第 1 到 3 步。第 4、5 步要你自己補 —— 而這兩步正好是面試時能講出差異化的地方。</p>
+</section>
+
+<section id="roadmap">
+  <span class="sec-num">10 — 執行</span>
+  <h2>四個階段</h2>
+  <p class="dek">刻意不從自己的資料開始。Stage 0 的目的是確認你的<strong>指標算得對</strong> —— 公開 benchmark 有 leaderboard，你算出 NDCG@10 = 0.42 可以立刻知道這是好是壞；自己的語料永遠沒有這個參照點。</p>
+
+  <div class="road">
+    <div class="stage">
+      <span class="stage-k">STAGE 0</span>
+      <span class="stage-t">拿公開 benchmark 校準程式碼</span>
+      <span class="stage-w">BEIR 的一個小 dataset，確認手刻的 Recall@k、NDCG 算得對</span>
+    </div>
+    <div class="stage">
+      <span class="stage-k">STAGE 1</span>
+      <span class="stage-t">調酒語料加手寫 30 題</span>
+      <span class="stage-w">含那三杯 Sour 的 hard negative。這 30 題是後面所有比較的基準線</span>
+    </div>
+    <div class="stage">
+      <span class="stage-k">STAGE 2</span>
+      <span class="stage-t">RAGAS 合成擴到 300 題</span>
+      <span class="stage-w">抽審過濾，補上 negative 與 multi-hop</span>
+    </div>
+    <div class="stage">
+      <span class="stage-k">STAGE 3</span>
+      <span class="stage-t">接進 CI，每次改動都跑</span>
+      <span class="stage-w">履歷上最有說服力的一句話來自這裡</span>
+    </div>
+  </div>
+
+  <p class="pull" style="margin-top:40px;">「我的 RAG 有一個 300 題的 eval set，換 embedding 讓 NDCG@10 從 0.61 到 0.74，加 rerank 再到 0.82，全部跑在 CI 裡。」</p>
+
+  <p>這句話能講出來，你就贏過絕大多數只會 demo 的候選人 —— 因為它同時證明了三件事：你有 ground truth、你做過受控比較、你把它工程化了。</p>
+</section>
+
+<section class="src">
+  <h2>參考來源</h2>
+  <ul>
+    <li><a href="https://www.premai.io/blog/rag-evaluation-metrics-frameworks-testing-2026/">RAG Evaluation: Metrics, Frameworks &amp; Testing (2026) — PremAI</a></li>
+    <li><a href="https://www.patronus.ai/llm-testing/rag-evaluation-metrics">RAG Evaluation Metrics: Best Practices — Patronus AI</a></li>
+    <li><a href="https://redis.io/blog/rag-system-evaluation/">RAG evaluation guide: metrics, frameworks &amp; infrastructure — Redis</a></li>
+    <li><a href="https://www.confident-ai.com/blog/rag-evaluation-metrics-answer-relevancy-faithfulness-and-more">RAG Evaluation Metrics: Answer Relevancy, Faithfulness and More — Confident AI</a></li>
+    <li><a href="https://www.analyticsvidhya.com/blog/2026/07/rag-evaluation-frameworks/">RAG Evaluation Frameworks Compared: RAGAS vs TruLens vs DeepEval — Analytics Vidhya</a></li>
+    <li><a href="https://deepeval.com/blog/top-5-llm-evaluation-frameworks">Top 5 LLM Evaluation Frameworks in 2026 — DeepEval</a></li>
+  </ul>
+</section>
+
+</main>
+</div>
+</div>
+</body>
+</html>

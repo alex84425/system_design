@@ -1,0 +1,51 @@
+{"id": "q001", "type": "factual", "relevant": ["negroni"], "q": "Negroni 的三種材料和比例是什麼？"}
+{"id": "q002", "type": "factual", "relevant": ["daiquiri"], "q": "黛綺莉要用多少萊姆汁？"}
+{"id": "q003", "type": "factual", "relevant": ["margarita"], "q": "瑪格麗特的鹽口為什麼只抹半圈？"}
+{"id": "q004", "type": "factual", "relevant": ["aviation"], "q": "飛行為什麼是藍紫色的？"}
+{"id": "q005", "type": "factual", "relevant": ["dry-martini"], "q": "馬丁尼為什麼不能用搖的？"}
+{"id": "q006", "type": "factual", "relevant": ["gibson"], "q": "吉普森的裝飾是什麼？"}
+{"id": "q007", "type": "factual", "relevant": ["old-fashioned"], "q": "古典雞尾酒為什麼要分次加冰塊？"}
+{"id": "q008", "type": "factual", "relevant": ["mojito"], "q": "莫希托的薄荷可以搗爛嗎？"}
+{"id": "q009", "type": "factual", "relevant": ["penicillin"], "q": "盤尼西林最後漂浮的那層是什麼酒？"}
+{"id": "q010", "type": "factual", "relevant": ["espresso-martini"], "q": "濃縮咖啡馬丁尼的咖啡一定要現萃的嗎？"}
+{"id": "q011", "type": "factual", "relevant": ["bees-knees"], "q": "蜂之膝的蜂蜜為什麼不能直接加進去？"}
+{"id": "q012", "type": "factual", "relevant": ["mai-tai"], "q": "正統的邁泰裡面有鳳梨汁嗎？"}
+{"id": "q013", "type": "factual", "relevant": ["moscow-mule"], "q": "莫斯科騾子為什麼要用銅杯？"}
+{"id": "q014", "type": "factual", "relevant": ["pina-colada"], "q": "鳳梨可樂達該用椰漿還是椰奶？"}
+{"id": "q015", "type": "factual", "relevant": ["clover-club"], "q": "含蛋白的調酒為什麼要先乾搖再濕搖？"}
+{"id": "q016", "type": "factual", "relevant": ["bloody-mary"], "q": "血腥瑪麗為什麼不能用搖盪的？"}
+{"id": "q017", "type": "factual", "relevant": ["last-word"], "q": "綠夏翠絲是什麼酒？"}
+{"id": "q018", "type": "factual", "relevant": ["sazerac"], "q": "薩澤拉克的檸檬皮要放進杯子裡嗎？"}
+{"id": "q019", "type": "factual", "relevant": ["bellini"], "q": "貝里尼為什麼一定要用白桃？"}
+{"id": "q020", "type": "factual", "relevant": ["aperol-spritz"], "q": "艾普羅氣泡飲的 3-2-1 比例是指什麼？"}
+{"id": "q021", "type": "factual", "relevant": ["boulevardier"], "q": "把 Negroni 的琴酒換成波本叫什麼？", "note": "易誤撈 negroni / old-pal，三者描述高度相似"}
+{"id": "q022", "type": "factual", "relevant": ["old-pal"], "q": "金巴利加裸麥威士忌加不甜香艾酒是哪一杯？", "note": "與 boulevardier 只差甜/不甜香艾酒"}
+{"id": "q023", "type": "factual", "relevant": ["rob-roy"], "q": "曼哈頓的蘇格蘭威士忌版本叫什麼？", "note": "易誤撈 manhattan"}
+{"id": "q024", "type": "factual", "relevant": ["gin-fizz", "tom-collins"], "q": "琴費士和湯姆可林斯差在哪裡？", "note": "兩篇都要撈到才算對"}
+{"id": "q025", "type": "factual", "relevant": ["black-russian", "white-russian"], "q": "黑色俄羅斯和白色俄羅斯的差別？", "note": "兩篇都要撈到"}
+{"id": "q026", "type": "factual", "relevant": ["dry-martini", "gibson"], "q": "馬丁尼和吉普森的材料一樣嗎？", "note": "材料欄位完全相同，差異只在文字描述"}
+{"id": "q027", "type": "colloquial", "relevant": ["daiquiri", "margarita", "sidecar"], "q": "有沒有那種酸酸甜甜、帶柑橘的短飲？", "note": "Sour 三兄弟，純向量排序近乎隨機"}
+{"id": "q031", "type": "multi_hop", "relevant": ["martinez", "hanky-panky", "negroni"], "q": "我有琴酒和甜香艾酒，可以調什麼？", "note": "需跨多篇比對材料。注意不甜馬丁尼用的是不甜香艾酒，不算正解"}
+{"id": "q032", "type": "multi_hop", "relevant": ["negroni", "boulevardier", "old-pal", "americano"], "q": "有哪些調酒會用到金巴利？"}
+{"id": "q033", "type": "multi_hop", "relevant": ["last-word", "corpse-reviver-2", "paper-plane"], "q": "有哪些是四種材料等比例的調酒？"}
+{"id": "q034", "type": "multi_hop", "relevant": ["clover-club", "pisco-sour", "whiskey-sour", "white-lady"], "q": "哪些調酒會用到蛋白？"}
+{"id": "q035", "type": "multi_hop", "relevant": ["moscow-mule", "dark-n-stormy", "penicillin"], "q": "有哪些調酒是薑味的？"}
+{"id": "q036", "type": "multi_hop", "relevant": ["aviation", "last-word", "martinez"], "q": "瑪拉斯奇諾櫻桃利口酒可以拿來調什麼？"}
+{"id": "q037", "type": "multi_hop", "relevant": ["negroni", "boulevardier", "old-pal", "dry-martini", "gibson", "martinez", "hanky-panky", "manhattan", "rob-roy", "vieux-carre", "sazerac"], "q": "哪些調酒是用攪拌而不是搖盪的？", "note": "正解等於所有 method=stir 的文件，共 11 篇。k 要開夠大才可能拿到高 Recall"}
+{"id": "q038", "type": "multi_hop", "relevant": ["mojito", "southside"], "q": "有哪些調酒會用到新鮮薄荷？"}
+{"id": "q041", "type": "colloquial", "relevant": ["aperol-spritz", "americano", "bellini"], "q": "有沒有喝起來不像酒、很淡的？", "note": "語料用「低酒精」「清爽」，問題用「不像酒」，用詞零重疊"}
+{"id": "q042", "type": "colloquial", "relevant": ["brandy-alexander", "white-russian", "pina-colada"], "q": "想喝甜甜的、像甜點那種"}
+{"id": "q043", "type": "colloquial", "relevant": ["negroni", "americano", "boulevardier", "old-pal"], "q": "我喜歡苦一點的，有推薦嗎？"}
+{"id": "q044", "type": "colloquial", "relevant": ["bloody-mary"], "q": "宿醉的時候喝什麼比較好？"}
+{"id": "q045", "type": "colloquial", "relevant": ["mojito", "paloma", "tom-collins", "cuba-libre"], "q": "夏天很熱，想要清爽解渴的"}
+{"id": "q046", "type": "colloquial", "relevant": ["old-fashioned", "manhattan", "rusty-nail", "boulevardier"], "q": "冬天想喝暖一點、濃一點的"}
+{"id": "q047", "type": "colloquial", "relevant": ["dry-martini", "old-fashioned", "negroni"], "q": "第一次去酒吧不知道點什麼，有沒有安全牌？"}
+{"id": "q048", "type": "colloquial", "relevant": ["espresso-martini"], "q": "喝了會提神的調酒"}
+{"id": "q051", "type": "negative", "relevant": [], "q": "Negroni 的抹茶版本比例是多少？"}
+{"id": "q052", "type": "negative", "relevant": [], "q": "長島冰茶要放幾種基酒？", "note": "語料中沒有長島冰茶"}
+{"id": "q053", "type": "negative", "relevant": [], "q": "這些調酒的熱量各是多少大卡？"}
+{"id": "q054", "type": "negative", "relevant": [], "q": "台北哪一間酒吧的 Negroni 最好喝？"}
+{"id": "q055", "type": "negative", "relevant": [], "q": "孕婦可以喝哪一杯？", "note": "同時測安全性回應"}
+{"id": "q056", "type": "negative", "relevant": [], "q": "Daiquiri 的發明人生日是哪一天？", "note": "語料提到 Jennings Cox 但沒有生日"}
+{"id": "q057", "type": "negative", "relevant": [], "q": "琴通寧的標準配方是什麼？", "note": "語料中沒有這杯，但主題極近，最容易硬掰"}
+{"id": "q058", "type": "negative", "relevant": [], "q": "Negroni 用哪個牌子的琴酒最好？", "note": "語料只談酒種不談品牌"}
